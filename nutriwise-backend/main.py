@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, make_response, request
 from pymongo import MongoClient
+from flask_cors import CORS
 
 app = Flask(__name__)
 client = MongoClient("mongodb://localhost:27017/")
@@ -10,6 +11,7 @@ client = MongoClient(mongo_url)
 db = client["nutriwise"]
 collection = db["user"]
 
+CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
 
 @app.route("/")
 def default():
@@ -30,7 +32,9 @@ def create_user():
         "password": user_password
     }
     collection.insert_one(user_doc)
-    return jsonify({"email": user_email, "password": user_password}), 200
+    resp = make_response("Cookie has been set!")
+    resp.set_cookie("my_cookie", user_email)
+    return resp, 200
 
 
 @app.route("/get-user/<email>", methods=["GET"])
@@ -179,7 +183,7 @@ def get_user_diet():
     "foods_to_add": 1,
     "foods_to_remove": 1,
     }
-    
+
     user_data = collection.find_one({"_id": email}, fields_to_return)
     if user_data:
         return jsonify(user_data), 200
