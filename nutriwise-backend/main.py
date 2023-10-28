@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response, request
 from pymongo import MongoClient
 
 app = Flask(__name__)
@@ -20,19 +20,6 @@ def serialize_doc(doc):
     doc["_id"] = str(doc["_id"])
     return doc
 
-
-@app.route("/get-user/<email>", methods=["GET"])
-def get_user(email):
-    fields_to_return = {
-        "password": 1
-    }
-    user_data = collection.find_one({"_id": email}, fields_to_return)
-    if user_data:
-        return jsonify(user_data), 200
-    else:
-        return jsonify({"error": "User not found"}), 404
-
-
 @app.route("/create-user", methods=["POST"])
 def create_user():
     data = request.get_json()
@@ -46,6 +33,36 @@ def create_user():
     return jsonify({"email": user_email, "password": user_password}), 200
 
 
+@app.route("/get-user/<email>", methods=["GET"])
+def get_user():
+    email = request.cookies.get("my_cookie")
+    if not email:
+        return jsonify({"error": "User not logged in"}), 401
+    fields_to_return = {
+        "password": 1
+    }
+    user_data = collection.find_one({"_id": email}, fields_to_return)
+    if user_data:
+        return jsonify(user_data), 200
+    else:
+        return jsonify({"error": "User not found"}), 404
+
+@app.route("/login", methods=["POST"])
+def login():
+    data = request.get_json()
+    email = data["email"]
+    password = data["password"]
+    user_data = collection.find_one({"_id": email})
+    if not user_data:
+        return jsonify({"error": "User not found"}), 404
+    real_password = user_data["password"]
+    if password != real_password:
+        return jsonify({"error": "Incorrect password"}), 401
+    else:
+        resp = make_response("Cookie has been set!")
+        resp.set_cookie("my_cookie", email)
+        return resp, 200
+
 @app.route("/get-users", methods=["GET"])
 def get_users():
     users = collection.find({}, {"_id": 1, "password": 1})
@@ -54,7 +71,11 @@ def get_users():
 
 
 @app.route("/create-user-data/<email>", methods=["POST"])
-def create_user_data(email):
+def create_user_data():
+    email = request.cookies.get("my_cookie")
+    if not email:
+        return jsonify({"error": "User not logged in"}), 401
+    
     data = request.get_json()
 
     user_update_data = {
@@ -93,7 +114,10 @@ def create_user_data(email):
 
 
 @app.route("/get-user-data/<email>", methods=["GET"])
-def get_user_age(email):
+def get_user_data():
+    email = request.cookies.get("my_cookie")
+    if not email:
+        return jsonify({"error": "User not logged in"}), 401
     fields_to_return = {
     "age": 1,
     "gender": 1,
@@ -121,7 +145,10 @@ def get_user_age(email):
         return jsonify({"error": "User not found"}), 404
       
 @app.route("/create-user-diet/<email>", methods=["POST"])
-def create_user_diet(email):
+def create_user_diet():
+    email = request.cookies.get("my_cookie")
+    if not email:
+        return jsonify({"error": "User not logged in"}), 401
     data = request.get_json()
     user_update_data = {
         "missing_vitamins": data.get("missing_vitamins"),
@@ -143,7 +170,10 @@ def create_user_diet(email):
 
 
 @app.route("/get-user-diet/<email>", methods=["GET"])
-def get_user_diet(email):
+def get_user_diet():
+    email = request.cookies.get("my_cookie")
+    if not email:
+        return jsonify({"error": "User not logged in"}), 401
     fields_to_return = {
     "missing_vitamins": 1,
     "foods_to_add": 1,
@@ -155,7 +185,6 @@ def get_user_diet(email):
         return jsonify(user_data), 200
     else:
         return jsonify({"error": "User not found"}), 404
-    
 
 
 if __name__ == '__main__':
