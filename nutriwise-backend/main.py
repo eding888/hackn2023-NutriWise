@@ -11,7 +11,18 @@ client = MongoClient(mongo_url)
 db = client["nutriwise"]
 collection = db["user"]
 
-CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
+CORS(
+    app,
+    resources={"/*": {"origins": ["http://localhost:5173"]}},
+    allow_headers="*",
+    supports_credentials=True,
+    expose_headers=[
+        "tokens",
+        "Set-Cookie",
+        "Access-Control-Allow-Origin",
+        "Access-Control-Allow-Credentials",
+    ],
+)
 
 @app.route("/")
 def default():
@@ -55,6 +66,7 @@ def get_user():
 def login():
     data = request.get_json()
     email = data["email"]
+    print(email)
     password = data["password"]
     user_data = collection.find_one({"_id": email})
     if not user_data:
@@ -64,7 +76,7 @@ def login():
         return jsonify({"error": "Incorrect password"}), 401
     else:
         resp = make_response("Cookie has been set!")
-        resp.set_cookie("my_cookie", email)
+        resp.set_cookie("my_cookie", email, path = '/', domain = "localhost", secure = False, httponly = False)
         return resp, 200
 
 @app.route("/get-users", methods=["GET"])
@@ -192,4 +204,4 @@ def get_user_diet():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5173)
