@@ -10,12 +10,10 @@ client = MongoClient(mongo_url)
 db = client["nutriwise"]
 collection = db["user"]
 
-people = {}
 
-
-@app.route("/", methods=["GET"])
-def get_people():
-    return jsonify(list(people.values())), 200
+@app.route("/")
+def default():
+    return "NutriWise Backend"
 
 
 def serialize_doc(doc):
@@ -25,7 +23,10 @@ def serialize_doc(doc):
 
 @app.route("/get-user/<email>", methods=["GET"])
 def get_user(email):
-    user_data = collection.find_one({"_id": email})
+    fields_to_return = {
+        "password": 1
+    }
+    user_data = collection.find_one({"_id": email}, fields_to_return)
     if user_data:
         return jsonify(user_data), 200
     else:
@@ -48,56 +49,114 @@ def create_user():
 @app.route("/get-users", methods=["GET"])
 def get_users():
     users = collection.find({}, {"_id": 1, "password": 1})
-    user_list = [{"email": user["_id"], "password": user["password"]} for user in users]
+    user_list = [{"email": user["_id"], "password": user.get("password")} for user in users]
     return jsonify(user_list), 200
 
 
-@app.route("/create-user-data", methods=["POST"])
-def create_user_data():
+@app.route("/create-user-data/<email>", methods=["POST"])
+def create_user_data(email):
     data = request.get_json()
-    user_email = data.get("email")
-    if not user_email:
-        return jsonify({"error": "Please provide an email"}), 400
 
-    user_age = data["age"]
-    user_gender = data["gender"]
-    user_height = data["height"]
-    user_weight = data["weight"]
-    user_activity_level = data["activity_level"]
-    user_target_nutr_goal = data["target_nutr_goal"]
-    user_target_cal_daily = data["target_cal_daily"]
-    user_allergies = data["allergies"]
-    user_dietary_preferences = data["dietary_preferences"]
-    user_food_intolerances = data["food_intolerances"]
-    user_health_conditions = data["health_conditions"]
-    user_medications = data["medications"]
-    user_breakfast = data["breakfast"]
-    user_lunch = data["lunch"]
-    user_dinner = data["dinner"]
-    user_snacks = data["snacks"]
-    user_daily_cal_consumed = data["daily_cal_consumed"]
-    user_doc = {
-        "_id": user_email,
-        "age": user_age,
-        "gender": user_gender,
-        "height": user_height,
-        "weight": user_weight,
-        "activity_level": user_activity_level,
-        "target_nutr_goal": user_target_nutr_goal,
-        "target_cal_daily": user_target_cal_daily,
-        "allergies": user_allergies,
-        "dietary_preferences": user_dietary_preferences,
-        "food_intolerances": user_food_intolerances,
-        "health_conditions": user_health_conditions,
-        "medications": user_medications,
-        "breakfast": user_breakfast,
-        "lunch": user_lunch,
-        "dinner": user_dinner,
-        "snacks": user_snacks,
-        "daily_cal_consumed": user_daily_cal_consumed        
+    user_update_data = {
+        "age": data.get("age"),
+        "gender": data.get("gender"),
+        "height": data.get("height"),
+        "weight": data.get("weight"),
+        "activity_level": data.get("activity_level"),
+        "target_nutr_goal": data.get("target_nutr_goal"),
+        "target_cal_daily": data.get("target_cal_daily"),
+        "allergies": data.get("allergies"),
+        "dietary_preferences": data.get("dietary_preferences"),
+        "food_intolerances": data.get("food_intolerances"),
+        "health_conditions": data.get("health_conditions"),
+        "medications": data.get("medications"),
+        "breakfast": data.get("breakfast"),
+        "lunch": data.get("lunch"),
+        "dinner": data.get("dinner"),
+        "snacks": data.get("snacks"),
+        "daily_cal_consumed": data.get("daily_cal_consumed")
     }
-    collection.insert_one(user_doc)
-    return jsonify(user_doc), 200
+
+    # Remove None values from user_update_data
+    user_update_data = {k: v for k, v in user_update_data.items() if v is not None}
+
+    result = collection.update_one(
+        {"_id": email},
+        {"$set": user_update_data},
+        upsert=True
+    )
+
+    if result.matched_count > 0 or result.upserted_id:
+        return jsonify({"message": "User data updated successfully"}), 200
+    else:
+        return jsonify({"error": "User update failed"}), 500
+
+
+@app.route("/get-user-data/<email>", methods=["GET"])
+def get_user_age(email):
+    fields_to_return = {
+    "age": 1,
+    "gender": 1,
+    "height": 1,
+    "weight": 1,
+    "activity_level": 1,
+    "target_nutr_goal": 1,
+    "target_cal_daily": 1,
+    "allergies": 1,
+    "dietary_preferences": 1,
+    "food_intolerances": 1,
+    "health_conditions": 1,
+    "medications": 1,
+    "breakfast": 1,
+    "lunch": 1,
+    "dinner": 1,
+    "snacks": 1,
+    "daily_cal_consumed": 1
+    }
+    
+    user_data = collection.find_one({"_id": email}, fields_to_return)
+    if user_data:
+        return jsonify(user_data), 200
+    else:
+        return jsonify({"error": "User not found"}), 404
+      
+@app.route("/create-user-diet/<email>", methods=["POST"])
+def create_user_diet(email):
+    data = request.get_json()
+    user_update_data = {
+        "missing_vitamins": data.get("missing_vitamins"),
+        "foods_to_add": data.get("foods_to_add"),
+        "foods_to_remove": data.get("foods_to_remove"),
+    }
+    user_update_data = {k: v for k, v in user_update_data.items() if v is not None}
+
+    result = collection.update_one(
+        {"_id": email},
+        {"$set": user_update_data},
+        upsert=True
+    )
+
+    if result.matched_count > 0 or result.upserted_id:
+        return jsonify({"message": "User data updated successfully"}), 200
+    else:
+        return jsonify({"error": "User update failed"}), 500
+
+
+@app.route("/get-user-diet/<email>", methods=["GET"])
+def get_user_diet(email):
+    fields_to_return = {
+    "missing_vitamins": 1,
+    "foods_to_add": 1,
+    "foods_to_remove": 1,
+    }
+    
+    user_data = collection.find_one({"_id": email}, fields_to_return)
+    if user_data:
+        return jsonify(user_data), 200
+    else:
+        return jsonify({"error": "User not found"}), 404
+    
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
