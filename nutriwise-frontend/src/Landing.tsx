@@ -20,6 +20,24 @@ function Landing() {
     }
   `;
 
+  const moveRightBack = keyframes`
+    from {
+      transform: translateX(500px);
+    }
+    to {
+      transform: translateX(0)px;
+    }
+  `;
+
+  const moveLeftBack = keyframes`
+    from {
+      transform: translateX(-500px);
+    }
+    to {
+      transform: translateX(0)px;
+    }
+  `;
+
   const wiggle = keyframes`
     0%{
       transform: rotate(0deg);
@@ -49,8 +67,8 @@ function Landing() {
       setRightAnim(`${moveLeft} 0.7s forwards ease-in-out`);
     } else {
       if(login) {
-        setLeftAnim("");
-        setRightAnim("");
+        setLeftAnim(`${moveRightBack} 0.7s forwards ease-in-out`);
+        setRightAnim(`${moveLeftBack} 0.7s forwards ease-in-out`);
       } else {
         setLeftAnim(`${moveRight} 0.7s forwards ease-in-out`);
         setRightAnim(`${moveLeft} 0.7s forwards ease-in-out`);

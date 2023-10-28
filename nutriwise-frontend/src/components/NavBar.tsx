@@ -1,4 +1,4 @@
-import { Image, useColorModeValue, useColorMode, IconButton, Flex } from "@chakra-ui/react"
+import { Image, useColorModeValue, useColorMode, IconButton, Flex, Box } from "@chakra-ui/react"
 import { SunIcon, MoonIcon } from '@chakra-ui/icons';
 
 function NavBar() {
