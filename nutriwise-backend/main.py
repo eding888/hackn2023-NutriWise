@@ -167,7 +167,7 @@ def create_user_diet():
         "foods_to_add": data.get("foods_to_add"),
         "foods_to_remove": data.get("foods_to_remove"),
     }
-    user_update_data = {k: v for k, v in user_update_data.items() if v is not None}
+    user_update_data = [{k: v for k, v in user_update_data.items() if v is not None}]
 
     result = collection.update_one(
         {"_id": email},
