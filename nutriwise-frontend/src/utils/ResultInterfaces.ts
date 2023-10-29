@@ -10,3 +10,8 @@ export interface FoodToRemove {
 export interface MissingVitamin {
   name: string
 }
+
+
+export interface Suggestion {
+  suggestion: string
+}

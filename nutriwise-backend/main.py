@@ -160,25 +160,28 @@ def get_user_data(email):
     if not email:
         return jsonify({"error": "User not logged in"}), 401
     fields_to_return = {
-    "age": 1,
-    "gender": 1,
-    "height": 1,
-    "weight": 1,
-    "activity_level": 1,
-    "target_nutr_goal": 1,
-    "target_cal_daily": 1,
-    "allergies": 1,
-    "dietary_preferences": 1,
-    "food_intolerances": 1,
-    "health_conditions": 1,
-    "medications": 1,
-    "breakfast": 1,
-    "lunch": 1,
-    "dinner": 1,
-    "snacks": 1,
-    "daily_cal_consumed": 1
+      "age": 1,
+      "gender": 1,
+      "height": 1,
+      "weight": 1,
+      "activity_level": 1,
+      "target_nutr_goal": 1,
+      "target_cal_daily": 1,
+      "allergies": 1,
+      "dietary_preferences": 1,
+      "food_intolerances": 1,
+      "health_conditions": 1,
+      "medications": 1,
+      "breakfast": 1,
+      "lunch": 1,
+      "dinner": 1,
+      "snacks": 1,
+      "daily_cal_consumed": 1,
+      "missing_vitamins": 1,
+      "foods_to_add": 1,
+      "foods_to_remove": 1
     }
-    
+
     user_data = collection.find_one({"_id": email}, fields_to_return)
     if user_data:
         return jsonify(user_data), 200

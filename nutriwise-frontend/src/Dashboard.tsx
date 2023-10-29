@@ -1,5 +1,5 @@
 import React,{ useState, SyntheticEvent, useEffect } from "react";
-import { Flex, Heading, Box, Input, FormControl, Button, UnorderedList, ListItem, Image, useDisclosure, FormLabel } from "@chakra-ui/react";
+import { Flex, Spinner, Heading, Box, Input, FormControl, Button, UnorderedList, ListItem, Image, useDisclosure, FormLabel, List } from "@chakra-ui/react";
 import {
   Drawer,
   DrawerBody,
@@ -9,12 +9,23 @@ import {
   DrawerContent,
   DrawerCloseButton,
 } from '@chakra-ui/react'
-import { getUserData, createBreakfast, createLunch, createDinner, createSnack, createConfiguraiton } from "./utils/Routing";
+import {
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+} from '@chakra-ui/react'
+import { getUserData, createBreakfast, createLunch, createDinner, createSnack, createConfiguraiton, removeFoods, createSuggestions } from "./utils/Routing";
 import { gptQueryJson, GptQuery } from './utils/GPT.ts';
-import { FoodToAdd, FoodToRemove, MissingVitamin} from "./utils/ResultInterfaces.ts";
+import { FoodToAdd, FoodToRemove, MissingVitamin, Suggestion } from "./utils/ResultInterfaces.ts";
 
 import NavBar from "./components/NavBar";
 const Dashboard = () => {
+  const [loading, setLoading] = useState(false);
+
   const [breakfast, setBreakfast] = useState([""]);
   const [lunch, setLunch] = useState([""]);
   const [dinner, setDinner] = useState([""]);
@@ -35,6 +46,7 @@ const Dashboard = () => {
   const [foodToAdd, setFoodToAdd] = useState([""]);
   const [foodToRemove, setFoodToRemove] = useState([""]);
   const [missingVitamins, setMissingVitamins] = useState([""]);
+  const [suggestions, setSuggestions] = useState([""]);
 
   const fetchUserData = async () => {
     const data = await getUserData();
@@ -56,6 +68,20 @@ const Dashboard = () => {
     const activityS = data.activity_level;
     const targetGoalS = data.target_nutr_goal;
     const medicationS = data.medications;
+
+    const foodAddS = data.foods_to_add;
+    const foodRemoveS = data.foods_to_remove;
+    const missingVitaminsS = data.missing_vitamins;
+
+    if(foodAddS) {
+      setFoodToAdd(foodAddS);
+    }
+    if(foodRemoveS) {
+      setFoodToRemove(foodRemoveS);
+    }
+    if(missingVitamins) {
+      setMissingVitamins(missingVitaminsS);
+    }
 
     if(breakfastS) {
       setBreakfast(breakfastS);
@@ -161,7 +187,8 @@ const Dashboard = () => {
   };
 
   const gpt = async () => {
-    console.log('hi');
+    setLoading(true);
+    onOpenLoad();
     const config: GptQuery = {
       breakfast_foods: breakfast.join(''),
       lunch_foods: lunch.join(''),
@@ -182,23 +209,42 @@ const Dashboard = () => {
     const nutrientsSuggestions: string[] = [];
     const foodsToAdd: string[] = [];
     const foodsToRemove: string[] = [];
+    const suggestions: string[] = [];
     results.foods_to_add.map((food: FoodToAdd) => {
       foodsToAdd.push(food.name);
     })
-    results.missing_vitamins.map((nutrient: MissingVitamin) => {
-      nutrientsSuggestions.push(nutrient.name);
-    })
+    if(results.missing_vitamins.length > 0) {
+      if(typeof results.missing_vitamins[0] === "string"){
+        results.missing_vitamins.map((nutrient: string) => {
+          nutrientsSuggestions.push(nutrient);
+        })
+      } else {
+        results.missing_vitamins.map((nutrient: MissingVitamin) => {
+          nutrientsSuggestions.push(nutrient.name);
+        })
+      }
+    }
+
     results.foods_to_remove.map((food: FoodToRemove) => {
       foodsToRemove.push(food.name);
+    })
+    results.suggestions_for_diet.map((suggestion: Suggestion) => {
+      suggestions.push(suggestion.suggestion);
     })
     setFoodToAdd(foodsToAdd);
     setFoodToRemove(foodsToRemove);
     setMissingVitamins(nutrientsSuggestions);
+    setSuggestions(suggestions);
+    setLoading(false);
+    await createSuggestions(nutrientsSuggestions, foodsToAdd, foodsToRemove);
+    await removeFoods();
+    await fetchData();
   }
   const save = async () => {
     await createConfiguraiton(allergies, age, weight, height, gender, activityLevel, goal, medications);
   }
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen: isOpenLoad, onOpen: onOpenLoad, onClose: onCloseLoad } = useDisclosure();
   const btnRef = React.useRef();
   const openDrawer = async () => {
     console.log('hi');
@@ -221,7 +267,7 @@ const Dashboard = () => {
               />
               <Heading size='lg'>Breakfast</Heading>
             </Flex>
-            <Flex mt = '2' w='200px' h='200px' border="3px inset"borderRadius='7px' justifyContent='center'>
+            <Flex overflow="auto" mt = '2' w='200px' h='200px' border="3px inset"borderRadius='7px' justifyContent='center'>
               <UnorderedList>
               {
                 breakfast.map(food => {
@@ -250,7 +296,7 @@ const Dashboard = () => {
               />
               <Heading size='lg'>Lunch</Heading>
             </Flex>
-            <Flex mt = '2' w='200px' h='200px' border="3px inset" borderRadius='7px' justifyContent='center'>
+            <Flex overflow="auto" mt = '2' w='200px' h='200px' border="3px inset" borderRadius='7px' justifyContent='center'>
               <UnorderedList>
               {
                 lunch.map(food => {
@@ -279,7 +325,7 @@ const Dashboard = () => {
               />
               <Heading size='lg'>Dinner</Heading>
             </Flex>
-            <Flex mt = '2' w='200px' h='200px' border="3px inset"borderRadius='7px' justifyContent='center'>
+            <Flex overflow="auto" mt = '2' w='200px' h='200px' border="3px inset"borderRadius='7px' justifyContent='center'>
               <UnorderedList>
               {
                 dinner.map(food => {
@@ -308,7 +354,7 @@ const Dashboard = () => {
               />
               <Heading size='lg'>Snacks</Heading>
             </Flex>
-            <Flex mt = '2' w='200px' h='200px' border="3px inset"borderRadius='7px' justifyContent='center'>
+            <Flex overflow="auto" mt = '2' w='200px' h='200px' border="3px inset"borderRadius='7px' justifyContent='center'>
               <UnorderedList>
               {
                 snacks.map(food => {
@@ -332,7 +378,7 @@ const Dashboard = () => {
         </Box>
         <Box>
           <Heading size='md' mt = '3'>Suggested Nutrients</Heading>
-          <Flex mt = '2' w='290px' h='200px' border="3px inset"borderRadius='7px' justifyContent='center'>
+          <Flex overflow="auto" mt = '2' w='290px' h='200px' border="3px inset"borderRadius='7px' justifyContent='center'>
             <UnorderedList>
               {
                 missingVitamins.map(vitamin => {
@@ -344,27 +390,31 @@ const Dashboard = () => {
               </UnorderedList>
           </Flex>
           <Heading size='md' mt='3'>Suggested Foods</Heading>
-          <Flex mt = '2' w='290px' h='200px' border="3px inset"borderRadius='7px' justifyContent='center'>
+          <Flex overflow="auto" mt = '2' w='290px' h='200px' border="3px inset"borderRadius='7px' justifyContent='center'>
              <UnorderedList>
               {
-                foodToAdd.map(food => {
-                  return(
-                    <ListItem>{food}</ListItem>
-                  );
-                })
+                (foodToAdd.length > 0 && foodToAdd[0] !== "") ? (
+                  foodToAdd.map(food => {
+                    return(
+                      <ListItem>{food}</ListItem>
+                    );
+                  })
+                ) : (<></>)
               }
               </UnorderedList>
           </Flex>
 
           <Heading size='md' mt = '3'>Foods to Avoid</Heading>
-          <Flex mt = '2' w='290px' h='200px' border="3px inset"borderRadius='7px' justifyContent='center'>
+          <Flex overflow="auto" mt = '2' w='290px' h='200px' border="3px inset"borderRadius='7px' justifyContent='center'>
             <UnorderedList>
               {
-                foodToRemove.map(food => {
-                  return(
-                    <ListItem>{food}</ListItem>
-                  );
-                })
+                (foodToRemove.length > 0 && foodToAdd[0] !== "") ? (
+                  foodToRemove.map(food => {
+                    return(
+                      <ListItem>{food}</ListItem>
+                    );
+                  })
+                ) : (<></>)
               }
               </UnorderedList>
           </Flex>
@@ -422,6 +472,55 @@ const Dashboard = () => {
               </DrawerFooter>
             </DrawerContent>
           </Drawer>
+
+          <Modal isOpen={isOpenLoad} onClose={onCloseLoad}>
+            <ModalOverlay />
+            <ModalContent>
+              <ModalBody>
+                {
+                  loading ? (
+                    <Flex direction='column' alignItems='center' justifyContent='center'>
+                      <Heading size="lg" mt='10' mb='8'>NutriWise is Thinking...</Heading>
+                      <Spinner
+                        thickness='4px'
+                        speed='0.65s'
+                        emptyColor='gray.200'
+                        color='red.300'
+                        size='xl'
+                      />
+                    </Flex>
+                  ) : (
+                    <Flex direction='column' alignItems='center' justifyContent='center'>
+                      <Heading size='md' mt='5'>NutriWise's Suggestions:</Heading>
+                      <UnorderedList mt = '2'>
+                        {
+                          suggestions.map(suggestion => {
+                            return (
+                              <ListItem>{suggestion}</ListItem>
+                            )
+                          })
+                        }
+                      </UnorderedList>
+                    </Flex>
+                  )
+                }
+              </ModalBody>
+
+              <ModalFooter>
+                {
+                  loading ? (
+                    <>
+                    </>
+                  ) : (
+                    <Button colorScheme='red' mr={3} onClick={onCloseLoad}>
+                      Close
+                    </Button>
+                  )
+                }
+                
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
         </Box>
       </Flex>
     </>

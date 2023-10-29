@@ -75,16 +75,42 @@ export const createSnack = async (snacks: string) => {
 
 };
 
+export const createSuggestions = async (missing_vitamins: string[], foods_to_add: string[], foods_to_remove: string[]) => {
+  try {
+     await axios.post(`${backendUrl}/create-user-diet`, { missing_vitamins, email: window.localStorage.getItem('token') });
+     await axios.post(`${backendUrl}/create-user-diet`, { foods_to_add, email: window.localStorage.getItem('token') });
+     await axios.post(`${backendUrl}/create-user-diet`, { foods_to_remove, email: window.localStorage.getItem('token') });
+    return "OK";
+  } catch (error) {
+    console.log(error);
+  }
+
+};
+
+export const removeFoods = async () => {
+  try {
+    const email = window.localStorage.getItem('token');
+    if(!email) {
+      return
+    }
+    await axios.post(`${backendUrl}/delete-user-meals`, {email});
+    return "OK";
+  } catch (error) {
+    console.log(error);
+  }
+
+};
+
 export const createConfiguraiton = async (allergies: string, age: number, weight: number, height: string, gender: string, activity_level:string, target_nutrition_goal: string, medications: string) => {
   try {
-     await axios.post(`${backendUrl}/create-user-data`, { allergies, email: window.localStorage.getItem('token') });
-     await axios.post(`${backendUrl}/create-user-data`, { age, email: window.localStorage.getItem('token') });
-     await axios.post(`${backendUrl}/create-user-data`, { weight, email: window.localStorage.getItem('token') });
-     await axios.post(`${backendUrl}/create-user-data`, { height, email: window.localStorage.getItem('token') });
-     await axios.post(`${backendUrl}/create-user-data`, { gender, email: window.localStorage.getItem('token') });
-     await axios.post(`${backendUrl}/create-user-data`, { activity_level, email: window.localStorage.getItem('token') });
-     await axios.post(`${backendUrl}/create-user-data`, { target_nutr_goal: target_nutrition_goal, email: window.localStorage.getItem('token') });
-     await axios.post(`${backendUrl}/create-user-data`, { medications, email: window.localStorage.getItem('token') });
+     await axios.post(`${backendUrl}/replace-user-data`, { allergies, email: window.localStorage.getItem('token') });
+     await axios.post(`${backendUrl}/replace-user-data`, { age, email: window.localStorage.getItem('token') });
+     await axios.post(`${backendUrl}/replace-user-data`, { weight, email: window.localStorage.getItem('token') });
+     await axios.post(`${backendUrl}/replace-user-data`, { height, email: window.localStorage.getItem('token') });
+     await axios.post(`${backendUrl}/replace-user-data`, { gender, email: window.localStorage.getItem('token') });
+     await axios.post(`${backendUrl}/replace-user-data`, { activity_level, email: window.localStorage.getItem('token') });
+     await axios.post(`${backendUrl}/replace-user-data`, { target_nutr_goal: target_nutrition_goal, email: window.localStorage.getItem('token') });
+     await axios.post(`${backendUrl}/replace-user-data`, { medications, email: window.localStorage.getItem('token') });
     return "OK";
   } catch (error) {
     console.log(error);
