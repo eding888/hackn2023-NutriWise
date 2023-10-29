@@ -1,31 +1,66 @@
-import { useState, SyntheticEvent } from "react";
-import { Flex, Heading, Box, Input, FormControl, Button, UnorderedList, ListItem, List, Image } from "@chakra-ui/react";
+import { useState, SyntheticEvent, useEffect } from "react";
+import { Flex, Heading, Box, Input, FormControl, Button, UnorderedList, ListItem, Image } from "@chakra-ui/react";
+import { getUserData, createBreakfast, createLunch, createDinner, createSnack } from "./utils/Routing";
 import NavBar from "./components/NavBar";
 const Dashboard = () => {
-  const [breakfast, setBreakfast] = useState(["aslls"]);
-  const [lunch, setLunch] = useState(["aslls"]);
-  const [dinner, setDinner] = useState(["aslls"]);
-  const [snacks, setSnacks] = useState(["aslls"]);
-  
+  const [breakfast, setBreakfast] = useState([""]);
+  const [lunch, setLunch] = useState([""]);
+  const [dinner, setDinner] = useState([""]);
+  const [snacks, setSnacks] = useState([""]);
+
   const [newBreakfast, setNewBreakfast] = useState("");
   const [newLunch, setNewLunch] = useState("");
   const [newDinner, setNewDinner] = useState("");
   const [newSnack, setNewSnack] = useState("");
 
-  const addBreakfast = (event: SyntheticEvent) => {
+  const fetchUserData = async () => {
+    const data = await getUserData();
+    return data;
+  }
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await fetchUserData();
+      console.log(data);
+      const breakfastS = data.breakfast;
+      const lunchS = data.lunch;
+      const dinnerS = data.dinner;
+      const snacksS = data.snacks;
+
+      if(breakfastS) {
+        setBreakfast(breakfastS);
+      }
+      if(lunchS) {
+        setLunch(lunchS);
+      }
+      if(dinnerS) {
+        setDinner(dinnerS);
+      }
+      if(snacksS) {
+        setSnacks(snacksS);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const addBreakfast = async (event: SyntheticEvent) => {
     event.preventDefault();
+    await createBreakfast(newBreakfast);
     setBreakfast(breakfast.concat(newBreakfast));
   }
-  const addLunch = (event: SyntheticEvent) => {
+  const addLunch = async (event: SyntheticEvent) => {
     event.preventDefault();
+    await createLunch(newLunch);
     setLunch(lunch.concat(newLunch));
   }
-  const addDinner = (event: SyntheticEvent) => {
+  const addDinner = async (event: SyntheticEvent) => {
     event.preventDefault();
+    await createDinner(newDinner);
     setDinner(dinner.concat(newDinner));
   }
-  const addSnack = (event: SyntheticEvent) => {
+  const addSnack = async (event: SyntheticEvent) => {
     event.preventDefault();
+    await createSnack(newSnack);
     setSnacks(snacks.concat(newSnack));
   }
   const handleBreakfastForm = (event: SyntheticEvent): void => {

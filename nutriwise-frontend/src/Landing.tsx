@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { SyntheticEvent, useState } from "react";
 import { Box, Flex, keyframes, Heading, Image, FormControl, Input, FormLabel, Button } from "@chakra-ui/react"
 import NavBar from "./components/NavBar"
+import { loginRequest, signUpRequest } from "./utils/Routing";
+import { useNavigate } from "react-router-dom";
 function Landing() {
   const moveLeft = keyframes`
     from {
@@ -60,6 +62,36 @@ function Landing() {
   const [leftAnim, setLeftAnim] = useState("");
   const [rightAnim, setRightAnim] = useState("");
 
+  const [signUpEmail, setSignUpEmail] = useState("");
+  const [signUpPassword, setSignUpPassword] = useState("");
+
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+
+  const handleSignUpEmail = (event: SyntheticEvent): void => {
+    event.preventDefault();
+    const target = event.target as HTMLInputElement;
+    setSignUpEmail(target.value);
+  };
+
+  const handleSignUpPassword = (event: SyntheticEvent): void => {
+    event.preventDefault();
+    const target = event.target as HTMLInputElement;
+    setSignUpPassword(target.value);
+  };
+
+  const handleLoginEmail = (event: SyntheticEvent): void => {
+    event.preventDefault();
+    const target = event.target as HTMLInputElement;
+    setLoginEmail(target.value);
+  };
+
+  const handleLoginPassword = (event: SyntheticEvent): void => {
+    event.preventDefault();
+    const target = event.target as HTMLInputElement;
+    setLoginPassword(target.value);
+  };
+
   const switchLogin = () => {
     setLogin(!login);
     if(leftAnim === "") {
@@ -73,6 +105,23 @@ function Landing() {
         setLeftAnim(`${moveRight} 0.7s forwards ease-in-out`);
         setRightAnim(`${moveLeft} 0.7s forwards ease-in-out`);
       }
+    }
+
+  }
+  const navigate = useNavigate();
+  const execLogin = async (event: SyntheticEvent) => {
+    event.preventDefault();
+    const res = await loginRequest(loginEmail, loginPassword);
+    if(res == "OK") {
+      navigate('/dashboard')
+    }
+  }
+
+  const execSignUp = async (event: SyntheticEvent) => {
+    event.preventDefault();
+    const res = await signUpRequest(signUpEmail, signUpPassword);
+    if(res == "OK") {
+      navigate('/dashboard')
     }
 
   }
@@ -100,40 +149,42 @@ function Landing() {
             ? (
             <Flex direction="column" justifyContent='center' alignItems='center' height='100%'>
               <Heading>Sign Up</Heading>
-              <form>
+              <form onSubmit={execSignUp}>
                 <FormControl mt='3'>
                   <FormLabel>Email</FormLabel>
-                  <Input></Input>
+                  <Input onChange = {handleSignUpEmail} ></Input>
                 </FormControl>
                 <FormControl mt='2'>
                   <FormLabel>Password</FormLabel>
-                  <Input></Input>
+                  <Input type='password' onChange = {handleSignUpPassword}></Input>
                 </FormControl>
                 <FormControl mt='2'>
                   <FormLabel>Confirm Password</FormLabel>
-                  <Input></Input>
+                  <Input type='password'></Input>
                 </FormControl>
+                <Flex mt = '10' justifyContent='center' gap ="10px">
+                  <Button type = "submit" colorScheme="transparent" border="1px">Register</Button>
+                </Flex>
               </form>
-              <Flex mt = '10' justifyContent='center' gap ="10px">
-                <Button colorScheme="transparent" border="1px">Register</Button>
-              </Flex>
+
             </Flex>
             ) :
             <Flex direction="column" justifyContent='center' alignItems='center' height='100%'>
               <Heading>Login</Heading>
-              <form>
+              <form onSubmit={execLogin}>
                 <FormControl mt='3'>
                   <FormLabel>Email</FormLabel>
-                  <Input></Input>
+                  <Input onChange = {handleLoginEmail}></Input>
                 </FormControl>
                 <FormControl mt='2'>
                   <FormLabel>Password</FormLabel>
-                  <Input></Input>
+                  <Input onChange = {handleLoginPassword}></Input>
                 </FormControl>
+                <Flex mt = '10' justifyContent='center' gap ="10px">
+                  <Button type='submit' colorScheme="transparent" border="1px">Login</Button>
+                </Flex>
               </form>
-              <Flex mt = '10' justifyContent='center' gap ="10px">
-                <Button colorScheme="transparent" border="1px">Login</Button>
-              </Flex>
+
             </Flex>
             }
 
