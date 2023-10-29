@@ -199,6 +199,22 @@ def get_user_diet(email):
         return jsonify(user_data), 200
     else:
         return jsonify({"error": "User not found"}), 404
+    
+@app.route("/delete-user-meals/<email>", methods=["DELETE"])
+def delete_user_meals():
+    data = request.get_json()
+    email = data.get("email")
+    if not email:
+        return jsonify({"error": "User not logged in"}), 401
+    result = collection.update_one(
+        {"_id": email},
+        {"$set": {"breakfast": [], "lunch": [], "dinner": [], "snacks": []}},
+        upsert=True
+    )
+    if result.matched_count > 0 or result.upserted_id:
+        return jsonify({"message": "User meals deleted successfully"}), 200
+    else:
+        return jsonify({"error": "User meals deletion failed"}), 500
 
 
 if __name__ == '__main__':
