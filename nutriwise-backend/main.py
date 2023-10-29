@@ -82,21 +82,28 @@ def create_user_data():
     email = data.get("email")
     if not email:
         return jsonify({"error": "User not logged in"}), 401
-
     concat_fields = ["allergies", "dietary_preferences", "food_intolerances", "health_conditions", "medications", "breakfast", "lunch", "dinner", "snacks"]
-    existing_user_data = collection.find_one({"_id": email})
+    existing_user_data = collection.find_one({"_id": email}) or {}
 
     update_operations = {}
     for field in concat_fields:
         if field in data:
-            existing_value = existing_user_data.get(field, "")
-            new_value = data[field]
-            concatenated_value = (existing_value + ", " + new_value).strip(", ")
-            update_operations[field] = concatenated_value
+            # Ensure both existing_value and new_value are lists
+            existing_value = existing_user_data.get(field, [])
+            if not isinstance(existing_value, list):
+                existing_value = [existing_value]
 
-    for field in data:
+            new_value = data[field]
+            if not isinstance(new_value, list):
+                new_value = [new_value]
+
+            # Append new_value to existing_value
+            update_operations[field] = existing_value + new_value
+
+    # Update fields that are not in concat_fields directly
+    for field, value in data.items():
         if field not in concat_fields:
-            update_operations[field] = data[field]
+            update_operations[field] = value
 
     result = collection.update_one(
         {"_id": email},
@@ -108,7 +115,6 @@ def create_user_data():
         return jsonify({"message": "User data updated successfully"}), 200
     else:
         return jsonify({"error": "User update failed"}), 500
-
 
 
 @app.route("/get-user-data/<email>", methods=["GET"])
@@ -148,16 +154,24 @@ def create_user_diet():
     if not email:
         return jsonify({"error": "User not logged in"}), 401
 
+    # Fields to be concatenated as lists
     concat_fields = ["missing_vitamins", "foods_to_add", "foods_to_remove"]
-    existing_user_data = collection.find_one({"_id": email})
+    existing_user_data = collection.find_one({"_id": email}) or {}
 
     update_operations = {}
     for field in concat_fields:
         if field in data:
-            existing_value = existing_user_data.get(field, "")
+            # Ensure both existing_value and new_value are lists
+            existing_value = existing_user_data.get(field, [])
+            if not isinstance(existing_value, list):
+                existing_value = [existing_value]  # Convert to list if not already
+
             new_value = data[field]
-            concatenated_value = (existing_value + ", " + new_value).strip(", ")
-            update_operations[field] = concatenated_value
+            if not isinstance(new_value, list):
+                new_value = [new_value]  # Convert to list if not already
+
+            # Append new_value to existing_value
+            update_operations[field] = existing_value + new_value
 
     result = collection.update_one(
         {"_id": email},
