@@ -43,14 +43,12 @@ def create_user():
         "password": user_password
     }
     collection.insert_one(user_doc)
-    resp = make_response("Cookie has been set!")
-    resp.set_cookie("my_cookie", user_email)
-    return resp, 200
+    email = user_email
+    return jsonify(email), 200
 
 
 @app.route("/get-user/<email>", methods=["GET"])
-def get_user():
-    email = request.cookies.get("my_cookie")
+def get_user(email):
     if not email:
         return jsonify({"error": "User not logged in"}), 401
     fields_to_return = {
@@ -75,9 +73,7 @@ def login():
     if password != real_password:
         return jsonify({"error": "Incorrect password"}), 401
     else:
-        resp = make_response("Cookie has been set!")
-        resp.set_cookie("my_cookie", email, path = '/', domain = "localhost", secure = False, httponly = False)
-        return resp, 200
+        return jsonify(email), 200
 
 @app.route("/get-users", methods=["GET"])
 def get_users():
@@ -86,12 +82,12 @@ def get_users():
     return jsonify(user_list), 200
 
 
-@app.route("/create-user-data/<email>", methods=["POST"])
+@app.route("/create-user-data", methods=["POST"])
 def create_user_data():
-    email = request.cookies.get("my_cookie")
+    data = request.get_json()
+    email = data["email"]
     if not email:
         return jsonify({"error": "User not logged in"}), 401
-    
     data = request.get_json()
 
     user_update_data = {
@@ -130,8 +126,7 @@ def create_user_data():
 
 
 @app.route("/get-user-data/<email>", methods=["GET"])
-def get_user_data():
-    email = request.cookies.get("my_cookie")
+def get_user_data(email):
     if not email:
         return jsonify({"error": "User not logged in"}), 401
     fields_to_return = {
@@ -160,9 +155,10 @@ def get_user_data():
     else:
         return jsonify({"error": "User not found"}), 404
       
-@app.route("/create-user-diet/<email>", methods=["POST"])
+@app.route("/create-user-diet/", methods=["POST"])
 def create_user_diet():
-    email = request.cookies.get("my_cookie")
+    data = request.get_json()
+    email = data["email"]
     if not email:
         return jsonify({"error": "User not logged in"}), 401
     data = request.get_json()
@@ -186,8 +182,7 @@ def create_user_diet():
 
 
 @app.route("/get-user-diet/<email>", methods=["GET"])
-def get_user_diet():
-    email = request.cookies.get("my_cookie")
+def get_user_diet(email):
     if not email:
         return jsonify({"error": "User not logged in"}), 401
     fields_to_return = {
@@ -204,4 +199,4 @@ def get_user_diet():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5173)
+    app.run(host="localhost", port=5173)
