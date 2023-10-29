@@ -13,15 +13,7 @@ collection = db["user"]
 
 CORS(
     app,
-    resources={"/*": {"origins": ["http://localhost:5173"]}},
-    allow_headers="*",
     supports_credentials=True,
-    expose_headers=[
-        "tokens",
-        "Set-Cookie",
-        "Access-Control-Allow-Origin",
-        "Access-Control-Allow-Credentials",
-    ],
 )
 
 @app.route("/")
@@ -37,6 +29,7 @@ def serialize_doc(doc):
 def create_user():
     data = request.get_json()
     user_email = data["email"]
+    print(user_email)
     user_password = data["password"]
     user_doc = {
         "_id": user_email,
