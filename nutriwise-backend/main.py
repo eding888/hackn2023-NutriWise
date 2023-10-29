@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, make_response, request
 from pymongo import MongoClient
 from flask_cors import CORS
+from bson import ObjectId
 
 app = Flask(__name__)
 client = MongoClient("mongodb://localhost:27017/")
@@ -78,37 +79,28 @@ def get_users():
 @app.route("/create-user-data", methods=["POST"])
 def create_user_data():
     data = request.get_json()
-    email = data["email"]
+    email = data.get("email")
     if not email:
         return jsonify({"error": "User not logged in"}), 401
-    data = request.get_json()
+    
+    concat_fields = ["allergies", "dietary_preferences", "food_intolerances", "health_conditions", "medications", "breakfast", "lunch", "dinner", "snacks"]
+    existing_user_data = collection.find_one({"_id": email})
 
-    user_update_data = {
-        "age": data.get("age"),
-        "gender": data.get("gender"),
-        "height": data.get("height"),
-        "weight": data.get("weight"),
-        "activity_level": data.get("activity_level"),
-        "target_nutr_goal": data.get("target_nutr_goal"),
-        "target_cal_daily": data.get("target_cal_daily"),
-        "allergies": data.get("allergies"),
-        "dietary_preferences": data.get("dietary_preferences"),
-        "food_intolerances": data.get("food_intolerances"),
-        "health_conditions": data.get("health_conditions"),
-        "medications": data.get("medications"),
-        "breakfast": data.get("breakfast"),
-        "lunch": data.get("lunch"),
-        "dinner": data.get("dinner"),
-        "snacks": data.get("snacks"),
-        "daily_cal_consumed": data.get("daily_cal_consumed")
-    }
+    update_operations = {}
+    for field in concat_fields:
+        if field in data:
+            existing_value = existing_user_data.get(field, "")
+            new_value = data[field]
+            concatenated_value = (existing_value + ", " + new_value).strip(", ")
+            update_operations[field] = concatenated_value
 
-    # Remove None values from user_update_data
-    user_update_data = {k: v for k, v in user_update_data.items() if v is not None}
+    for field in data:
+        if field not in concat_fields:
+            update_operations[field] = data[field]
 
     result = collection.update_one(
         {"_id": email},
-        {"$set": user_update_data},
+        {"$set": update_operations},
         upsert=True
     )
 
@@ -116,6 +108,7 @@ def create_user_data():
         return jsonify({"message": "User data updated successfully"}), 200
     else:
         return jsonify({"error": "User update failed"}), 500
+
 
 
 @app.route("/get-user-data/<email>", methods=["GET"])
@@ -151,27 +144,31 @@ def get_user_data(email):
 @app.route("/create-user-diet/", methods=["POST"])
 def create_user_diet():
     data = request.get_json()
-    email = data["email"]
+    email = data.get("email")
     if not email:
         return jsonify({"error": "User not logged in"}), 401
-    data = request.get_json()
-    user_update_data = {
-        "missing_vitamins": data.get("missing_vitamins"),
-        "foods_to_add": data.get("foods_to_add"),
-        "foods_to_remove": data.get("foods_to_remove"),
-    }
-    user_update_data = [{k: v for k, v in user_update_data.items() if v is not None}]
+
+    concat_fields = ["missing_vitamins", "foods_to_add", "foods_to_remove"]
+    existing_user_data = collection.find_one({"_id": email})
+
+    update_operations = {}
+    for field in concat_fields:
+        if field in data:
+            existing_value = existing_user_data.get(field, "")
+            new_value = data[field]
+            concatenated_value = (existing_value + ", " + new_value).strip(", ")
+            update_operations[field] = concatenated_value
 
     result = collection.update_one(
         {"_id": email},
-        {"$set": user_update_data},
+        {"$set": update_operations},
         upsert=True
     )
 
     if result.matched_count > 0 or result.upserted_id:
-        return jsonify({"message": "User data updated successfully"}), 200
+        return jsonify({"message": "User diet data updated successfully"}), 200
     else:
-        return jsonify({"error": "User update failed"}), 500
+        return jsonify({"error": "User diet update failed"}), 500
 
 
 @app.route("/get-user-diet/<email>", methods=["GET"])
