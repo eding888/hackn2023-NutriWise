@@ -111,7 +111,7 @@ def create_user_data():
     }
 
     # Remove None values from user_update_data
-    user_update_data = {k: v for k, v in user_update_data.items() if v is not None}
+    user_update_data = [{k: v for k, v in user_update_data.items() if v is not None}]
 
     result = collection.update_one(
         {"_id": email},
