@@ -256,7 +256,7 @@ const Dashboard = () => {
       <NavBar></NavBar>
       <Flex height='calc(100vh - 78px)'justifyContent="center" alignItems="center" gap = "30px">
         <Box>
-        <Heading mb = '3'>Today's Diet</Heading>
+        <Heading mb = '3' fontWeight='extrabold'>Today's Diet</Heading>
         <Flex width='500px' wrap='wrap' gap='30px'>
           <Flex direction="column">
             <Flex alignItems='center'justifyContent='center' gap='10px'>
@@ -270,11 +270,15 @@ const Dashboard = () => {
             <Flex overflow="auto" mt = '2' w='200px' h='200px' border="3px inset"borderRadius='7px' justifyContent='center'>
               <UnorderedList>
               {
-                breakfast.map(food => {
-                  return(
-                    <ListItem>{food}</ListItem>
-                  );
-                })
+                  breakfast.map(food => {
+                    if(food == "") {
+                      return (<></>)
+                    } else {
+                      return(
+                        <ListItem>{food}</ListItem>
+                      );
+                    }
+                  })
               }
               </UnorderedList>
             </Flex>
@@ -300,9 +304,13 @@ const Dashboard = () => {
               <UnorderedList>
               {
                 lunch.map(food => {
-                  return(
-                    <ListItem>{food}</ListItem>
-                  );
+                  if(food == "") {
+                    return (<></>)
+                  } else {
+                    return(
+                      <ListItem>{food}</ListItem>
+                    );
+                  }
                 })
               }
               </UnorderedList>
@@ -328,11 +336,15 @@ const Dashboard = () => {
             <Flex overflow="auto" mt = '2' w='200px' h='200px' border="3px inset"borderRadius='7px' justifyContent='center'>
               <UnorderedList>
               {
-                dinner.map(food => {
-                  return(
-                    <ListItem>{food}</ListItem>
-                  );
-                })
+                  dinner.map(food => {
+                    if(food == "") {
+                      return (<></>)
+                    } else {
+                      return(
+                        <ListItem>{food}</ListItem>
+                      );
+                    }
+                  })
               }
               </UnorderedList>
             </Flex>
@@ -358,9 +370,13 @@ const Dashboard = () => {
               <UnorderedList>
               {
                 snacks.map(food => {
-                  return(
-                    <ListItem>{food}</ListItem>
-                  );
+                  if(food == "") {
+                    return (<></>)
+                  } else {
+                    return(
+                      <ListItem>{food}</ListItem>
+                    );
+                  }
                 })
               }
               </UnorderedList>
@@ -381,11 +397,17 @@ const Dashboard = () => {
           <Flex overflow="auto" mt = '2' w='290px' h='200px' border="3px inset"borderRadius='7px' justifyContent='center'>
             <UnorderedList>
               {
-                missingVitamins.map(vitamin => {
-                  return(
-                    <ListItem>{vitamin}</ListItem>
-                  );
-                })
+                  missingVitamins ? (
+                    missingVitamins.map(vitamin => {
+                      if(vitamin == "") {
+                        return (<></>)
+                      } else {
+                        return(
+                          <ListItem fontSize='lg'>{vitamin}</ListItem>
+                        );
+                      }
+                    })
+                  ) : (<></>)
               }
               </UnorderedList>
           </Flex>
@@ -393,13 +415,17 @@ const Dashboard = () => {
           <Flex overflow="auto" mt = '2' w='290px' h='200px' border="3px inset"borderRadius='7px' justifyContent='center'>
              <UnorderedList>
               {
-                (foodToAdd.length > 0 && foodToAdd[0] !== "") ? (
-                  foodToAdd.map(food => {
-                    return(
-                      <ListItem>{food}</ListItem>
-                    );
-                  })
-                ) : (<></>)
+                  foodToAdd ? (
+                    foodToAdd.map(food => {
+                      if(food == "") {
+                        return (<></>)
+                      } else {
+                        return(
+                          <ListItem fontSize='lg'>{food}</ListItem>
+                        );
+                      }
+                    })
+                  ) : (<></>)
               }
               </UnorderedList>
           </Flex>
@@ -408,11 +434,15 @@ const Dashboard = () => {
           <Flex overflow="auto" mt = '2' w='290px' h='200px' border="3px inset"borderRadius='7px' justifyContent='center'>
             <UnorderedList>
               {
-                (foodToRemove.length > 0 && foodToAdd[0] !== "") ? (
+                foodToRemove ? (
                   foodToRemove.map(food => {
-                    return(
-                      <ListItem>{food}</ListItem>
-                    );
+                    if(food == "") {
+                      return (<></>)
+                    } else {
+                      return(
+                        <ListItem fontSize='lg'>{food}</ListItem>
+                      );
+                    }
                   })
                 ) : (<></>)
               }
@@ -466,7 +496,7 @@ const Dashboard = () => {
 
               <DrawerFooter>
                 <Button variant='outline' mr={3} onClick={onClose}>
-                  Cancel
+                  Close
                 </Button>
                 <Button onClick = {save} colorScheme='blue'>Save</Button>
               </DrawerFooter>
@@ -491,12 +521,16 @@ const Dashboard = () => {
                     </Flex>
                   ) : (
                     <Flex direction='column' alignItems='center' justifyContent='center'>
-                      <Heading size='md' mt='5'>NutriWise's Suggestions:</Heading>
-                      <UnorderedList mt = '2'>
+                      <Heading size='md' mt='5' mb='3'>NutriWise's Diet Suggestions:</Heading>
+                      <Image
+                        src= "https://cdn-icons-png.flaticon.com/512/4080/4080032.png"
+                        width="80px"
+                      />
+                      <UnorderedList mt = '3'>
                         {
                           suggestions.map(suggestion => {
                             return (
-                              <ListItem>{suggestion}</ListItem>
+                              <ListItem fontSize='lg'>{suggestion}</ListItem>
                             )
                           })
                         }
@@ -517,7 +551,6 @@ const Dashboard = () => {
                     </Button>
                   )
                 }
-                
               </ModalFooter>
             </ModalContent>
           </Modal>
