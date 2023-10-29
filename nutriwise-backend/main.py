@@ -82,7 +82,7 @@ def create_user_data():
     email = data.get("email")
     if not email:
         return jsonify({"error": "User not logged in"}), 401
-    
+
     concat_fields = ["allergies", "dietary_preferences", "food_intolerances", "health_conditions", "medications", "breakfast", "lunch", "dinner", "snacks"]
     existing_user_data = collection.find_one({"_id": email})
 
