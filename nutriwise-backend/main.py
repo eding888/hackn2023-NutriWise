@@ -115,10 +115,9 @@ def create_user_data():
     else:
         return jsonify({"error": "User update failed"}), 500
     
-@app.route("/replace-user-data", methods=["POST"])
-def replace_user_data():
+@app.route("/replace-user-data/<email>", methods=["POST"])
+def replace_user_data(email):
     data = request.get_json()
-    email = data.get("email")
     if not email:
         return jsonify({"error": "User not logged in"}), 401
     update_fields = ["allergies", "dietary_preferences", "food_intolerances", "health_conditions", "medications", "breakfast", "lunch", "dinner", "snacks"]
