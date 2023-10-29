@@ -74,3 +74,20 @@ export const createSnack = async (snacks: string) => {
   }
 
 };
+
+export const createConfiguraiton = async (allergies: string, age: number, weight: number, height: string, gender: string, activity_level:string, target_nutrition_goal: string, medications: string) => {
+  try {
+     await axios.post(`${backendUrl}/create-user-data`, { allergies, email: window.localStorage.getItem('token') });
+     await axios.post(`${backendUrl}/create-user-data`, { age, email: window.localStorage.getItem('token') });
+     await axios.post(`${backendUrl}/create-user-data`, { weight, email: window.localStorage.getItem('token') });
+     await axios.post(`${backendUrl}/create-user-data`, { height, email: window.localStorage.getItem('token') });
+     await axios.post(`${backendUrl}/create-user-data`, { gender, email: window.localStorage.getItem('token') });
+     await axios.post(`${backendUrl}/create-user-data`, { activity_level, email: window.localStorage.getItem('token') });
+     await axios.post(`${backendUrl}/create-user-data`, { target_nutr_goal: target_nutrition_goal, email: window.localStorage.getItem('token') });
+     await axios.post(`${backendUrl}/create-user-data`, { medications, email: window.localStorage.getItem('token') });
+    return "OK";
+  } catch (error) {
+    console.log(error);
+  }
+
+};
