@@ -7,6 +7,8 @@ A website that lets users login, input daily diet choices and get personalized d
 
 Uses Typescript React for the frontend and Flask w/ MongoDB for the backend.
 
+Check out a demo video here: https://www.youtube.com/watch?v=jJLQmP5Bbuo
+
 Image Attributions:
 Healhy Salad Icon: https://cdn-icons-png.flaticon.com/512/4080/4080032.png
 Breakfast: https://cdn-icons-png.flaticon.com/512/4825/4825292.png
