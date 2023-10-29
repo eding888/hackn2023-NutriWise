@@ -185,19 +185,20 @@ def get_user_data(email):
     else:
         return jsonify({"error": "User not found"}), 404
 
+
 @app.route("/create-user-diet", methods=["POST"])
 def create_user_diet():
     data = request.get_json()
     email = data.get("email")
     if not email:
         return jsonify({"error": "User not logged in"}), 401
+
     update_fields = ["missing_vitamins", "foods_to_add", "foods_to_remove"]
     existing_user_data = collection.find_one({"_id": email}) or {}
 
     update_operations = {}
     for field in update_fields:
         if field in data:
-            # Ensure both existing_value and new_value are lists
             existing_value = existing_user_data.get(field, [])
             if not isinstance(existing_value, list):
                 existing_value = [existing_value]
@@ -208,32 +209,27 @@ def create_user_diet():
 
             update_operations[field] = new_value
 
-    # Update fields that are not in concat_fields directly
+    # Update fields that are not in update_fields directly
     for field, value in data.items():
         if field not in update_fields:
             update_operations[field] = value
 
-    result = collection.update_one(
-        {"_id": email},
-        {"$set": update_operations},
-        upsert=True
-    )
+    # Ensure the database connection is set up correctly
+    try:
+        result = collection.update_one(
+            {"_id": email},
+            {"$set": update_operations},
+            upsert=True
+        )
 
-    if result.matched_count > 0 or result.upserted_id:
-        return jsonify({"message": "User data updated successfully"}), 200
-    else:
-        return jsonify({"error": "User update failed"}), 500
-
-    result = collection.update_one(
-        {"_id": email},
-        {"$set": update_operations},
-        upsert=True
-    )
-
-    if result.matched_count > 0 or result.upserted_id:
-        return jsonify({"message": "User diet data updated successfully"}), 200
-    else:
-        return jsonify({"error": "User diet update failed"}), 500
+        if result.matched_count > 0 or result.upserted_id:
+            return jsonify({"message": "User diet data updated successfully"}), 200
+        else:
+            return jsonify({"error": "User diet update failed"}), 500
+    except Exception as e:
+        # This will print the error to the console. For production, you might want to log the error.
+        print(e)
+        return jsonify({"error": "Database error occurred"}), 500
 
 
 @app.route("/get-user-diet/<email>", methods=["GET"])
