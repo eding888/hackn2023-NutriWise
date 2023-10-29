@@ -1,5 +1,5 @@
 import React,{ useState, SyntheticEvent, useEffect } from "react";
-import { Flex, Spinner, Heading, Box, Input, FormControl, Button, UnorderedList, ListItem, Image, useDisclosure, FormLabel, List } from "@chakra-ui/react";
+import { Flex, Spinner, Heading, Box, Input, keyframes, FormControl, Button, UnorderedList, ListItem, Image, useDisclosure, FormLabel, List } from "@chakra-ui/react";
 import {
   Drawer,
   DrawerBody,
@@ -24,6 +24,31 @@ import { FoodToAdd, FoodToRemove, MissingVitamin, Suggestion } from "./utils/Res
 
 import NavBar from "./components/NavBar";
 const Dashboard = () => {
+    const wiggle = keyframes`
+    0%{
+      transform: translateY(0px);
+    }
+    50% {
+      transform:  translateY(-3px);
+      background-color: teal;
+    }
+    100%{
+      transform:  translateY(0px);
+    }
+  `;
+
+  const brain = keyframes`
+    0%{
+      transform: translateY(0px);
+    }
+    50% {
+      transform:  translateY(-3px);
+    }
+    100%{
+      transform:  translateY(0px);
+    }
+  `;
+
   const [loading, setLoading] = useState(false);
 
   const [breakfast, setBreakfast] = useState([""]);
@@ -393,7 +418,14 @@ const Dashboard = () => {
         <Button boxShadow='md' colorScheme='blue' mt='3' w='86%' onClick={gpt}>Get Feedback for Today</Button>
         </Box>
         <Box>
-          <Heading size='md' mt = '3'>Suggested Nutrients</Heading>
+          <Flex alignItems='center' gap='10px'>
+            <Image
+              src= "https://cdn-icons-png.flaticon.com/512/1529/1529570.png"
+              height="30px"
+              width="30px"
+            />
+            <Heading size='md' mt = '3'>Suggested Nutrients</Heading>
+          </Flex>
           <Flex overflow="auto" mt = '2' w='290px' h='200px' border="3px inset"borderRadius='7px' justifyContent='center'>
             <UnorderedList>
               {
@@ -411,7 +443,14 @@ const Dashboard = () => {
               }
               </UnorderedList>
           </Flex>
-          <Heading size='md' mt='3'>Suggested Foods</Heading>
+          <Flex alignItems='center' gap='5px' mt ='3'>
+            <Image
+              src= "https://cdn.pixabay.com/photo/2014/04/02/11/01/tick-305245_1280.png"
+              height="30px"
+              width="30px"
+            />
+            <Heading size='md' mt='3'>Suggested Foods</Heading>
+          </Flex>
           <Flex overflow="auto" mt = '2' w='290px' h='200px' border="3px inset"borderRadius='7px' justifyContent='center'>
              <UnorderedList>
               {
@@ -429,8 +468,14 @@ const Dashboard = () => {
               }
               </UnorderedList>
           </Flex>
-
-          <Heading size='md' mt = '3'>Foods to Avoid</Heading>
+          <Flex alignItems='center' gap='10px' mt ='3'>
+            <Image
+              src= "https://static.vecteezy.com/system/resources/previews/011/459/573/original/red-prohibited-or-letter-x-icons-free-png.png"
+              height="30px"
+              width="30px"
+            />
+            <Heading size='md' mt = '3'>Foods to Avoid</Heading>
+          </Flex>
           <Flex overflow="auto" mt = '2' w='290px' h='200px' border="3px inset"borderRadius='7px' justifyContent='center'>
             <UnorderedList>
               {
@@ -448,7 +493,7 @@ const Dashboard = () => {
               }
               </UnorderedList>
           </Flex>
-          <Button ref={btnRef} onClick={openDrawer}boxShadow='md' colorScheme='orange' mt='3' w='100%'>Configure Your Results</Button>
+          <Button ref={btnRef} animation={allergies == "" ? `${wiggle} 2s infinite` : ""}onClick={openDrawer}boxShadow='md' colorScheme='orange' mt='3' w='100%'>Configure Your Results</Button>
             <Drawer
               isOpen={isOpen}
               placement='right'
@@ -503,20 +548,19 @@ const Dashboard = () => {
             </DrawerContent>
           </Drawer>
 
-          <Modal isOpen={isOpenLoad} onClose={onCloseLoad}>
+          <Modal isOpen={isOpenLoad} onClose={onCloseLoad} closeOnOverlayClick={false}>
             <ModalOverlay />
             <ModalContent>
               <ModalBody>
                 {
                   loading ? (
                     <Flex direction='column' alignItems='center' justifyContent='center'>
-                      <Heading size="lg" mt='10' mb='8'>NutriWise is Thinking...</Heading>
-                      <Spinner
-                        thickness='4px'
-                        speed='0.65s'
-                        emptyColor='gray.200'
-                        color='red.300'
-                        size='xl'
+                      <Heading size="lg" mt='10'>NutriWise is Thinking...</Heading>
+                      <Box mb='8'>This might take up to a minute</Box>
+                      <Image
+                        animation = {`${brain} 1.5s infinite`}
+                        src= "https://creazilla-store.fra1.digitaloceanspaces.com/cliparts/69755/brain-clipart-md.png"
+                        width="80px"
                       />
                     </Flex>
                   ) : (
