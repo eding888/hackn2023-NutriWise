@@ -169,21 +169,25 @@ const Dashboard = () => {
     event.preventDefault();
     await createBreakfast(newBreakfast);
     setBreakfast(breakfast.concat(newBreakfast));
+    setNewBreakfast("");
   }
   const addLunch = async (event: SyntheticEvent) => {
     event.preventDefault();
     await createLunch(newLunch);
     setLunch(lunch.concat(newLunch));
+    setNewLunch("");
   }
   const addDinner = async (event: SyntheticEvent) => {
     event.preventDefault();
     await createDinner(newDinner);
     setDinner(dinner.concat(newDinner));
+    setNewDinner("");
   }
   const addSnack = async (event: SyntheticEvent) => {
     event.preventDefault();
     await createSnack(newSnack);
     setSnacks(snacks.concat(newSnack));
+    setNewSnack("");
   }
   const handleBreakfastForm = (event: SyntheticEvent): void => {
     event.preventDefault();
@@ -309,7 +313,7 @@ const Dashboard = () => {
             </Flex>
             <form onSubmit={addBreakfast}>
               <FormControl mt = '2'>
-                <Input w="200px" onChange={handleBreakfastForm}>
+                <Input w="200px" value={newBreakfast} onChange={handleBreakfastForm}>
                 </Input>
               </FormControl>
               <Button boxShadow='md' colorScheme='red' type='submit' mt = '2' w = "200px">Add</Button>
@@ -342,7 +346,7 @@ const Dashboard = () => {
             </Flex>
             <form onSubmit={addLunch}>
               <FormControl mt = '2'>
-                <Input w="200px" onChange={handleLunchForm}>
+                <Input w="200px" value={newLunch} onChange={handleLunchForm}>
                 </Input>
               </FormControl>
               <Button boxShadow='md' colorScheme='red' type='submit' mt = '2' w = "200px">Add</Button>
@@ -375,7 +379,7 @@ const Dashboard = () => {
             </Flex>
             <form onSubmit={addDinner}>
               <FormControl mt = '2'>
-                <Input w="200px" onChange={handleDinnerForm}>
+                <Input w="200px" value={newDinner} onChange={handleDinnerForm}>
                 </Input>
               </FormControl>
               <Button boxShadow='md' colorScheme='red' type='submit' mt = '2' w = "200px">Add</Button>
@@ -408,7 +412,7 @@ const Dashboard = () => {
             </Flex>
             <form onSubmit={addSnack}>
               <FormControl mt = '2'>
-                <Input w="200px" onChange={handleSnackForm}>
+                <Input w="200px" value={newSnack} onChange={handleSnackForm}>
                 </Input>
               </FormControl>
               <Button boxShadow='md' colorScheme='red' type='submit' mt = '2' w = "200px">Add</Button>

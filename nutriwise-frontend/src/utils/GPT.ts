@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
 //set api key found in .env file
 const openai = new OpenAI({
-  apiKey: "",
+  apiKey: "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",
   dangerouslyAllowBrowser: true
 });
 
